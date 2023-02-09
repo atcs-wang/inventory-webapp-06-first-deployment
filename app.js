@@ -1,10 +1,11 @@
 //set up the server
 const express = require( "express" );
 const logger = require("morgan");
-const db = require('./db/db_connection');
+const helmet = require("helmet");
+const db = require('./db/db_pool');
 const app = express();
-const port = 8080;
-
+const port = process.env.PORT || 8080;
+app.use(helmet());
 // Configure Express to use EJS
 app.set( "views",  __dirname + "/views");
 app.set( "view engine", "ejs" );
