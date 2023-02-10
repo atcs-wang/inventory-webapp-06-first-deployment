@@ -1,11 +1,13 @@
-# Part 06: Pre-deployment preparation 
+# Part 06: First Deployment  
 
 This tutorial follows after:
 [Part 05: Implementing CRUD operations: Using Forms and POST requests](https://github.com/atcs-wang/inventory-webapp-05-handling-forms-post-crud)
 
-With all the basic CRUD routes implemented, we have a usable web-app! At this point, it is almost time to  deploy a first version of your application to a cloud-hosting service.
+With all the basic CRUD routes implemented, we have a usable web-app! At this point, it is time to  deploy a first version of your application to a cloud-hosting service.
 
 In this tutorial, we'll do a variety of small changes that prepare our code for deployment. The eclectic set of changes detailed below are independent of each other, and could be added in any order. Furthermore, **all of these changes could have been incorporated earlier in the app development process.** Our tutorials so far have prioritized simplicity and getting things to "just work." We skipped these improvements in favor of only learning what was necessary to use/understand at the time, but in future apps you develop, you can utilize them almost immediately.
+
+Finally, we'll use a beginner-friendly cloud hosting service to deploy your application to the web!
 
 # (6.1) `npm` scripts
 
@@ -141,15 +143,48 @@ Now `db` throughout `app.js` is a `Pool` object, rather than a `Connection` obje
 
 > Read more about the use of connection pools here: [https://www.npmjs.com/package/mysql2#using-connection-pools](https://www.npmjs.com/package/mysql2#using-connection-pools) 
 
-# (6.5) What's next?
+# (6.5) Time to Deploy! (via `railway.app`)
 
 Now you're ready to deploy your app for the first time on a cloud service!
 
-We will not recommend a specific cloud service here, as the landscape of available services (especially those with a credit-card-less free tier) is changing constantly. If you're doing this tutorial as part of a class, your teacher will guide you through the basics of deploying with a suitable service.
+The landscape of cloud services for web app deployment is changing constantly, and the options can be overwhelming, especially for first-time app developers. 
 
-> Here is an article from late 2022 with a few possibilities: 
-> [https://codedamn.com/news/nodejs/free-hosting-website](https://codedamn.com/news/nodejs/free-hosting-website)
-> Keep in mind, however, that MySQL database hosting
-> is something you'll need to consider as well.
+At the time of this tutorial's publishing, we would recommend using [railway.app](https://railway.app) for your first deployment. It sports:
+1. A credit-card-less free tier
+2. Beginner-friendly online dashboard
+3. Easy integration with Github, with auto-deployment on new commits
+4. Native support for MySQL database instances (and some other database types too)
+5. Relatively succinct documentation
 
-Afterwards, there are still many improvements to make to our app....
+Railway's free-tier has limit of 500 hrs/month operation which would require some judicious "turning" off of your app to last the month. (Unchecked, you'll run out of hours after ~3 weeks of uptime).  If you're willing to add your credit card to your account, you can fairly affordably remove the limit, paying for whatever amount of compute power / runtime that you need. 
+
+We will not provide detailed instructions on using Railway here, but here are the general steps you should take:
+1. Create an account on [railway.app](https://railway.app); the most convenient is to use your Github account as your login.
+2. As prompted, allow railway.app access to your repository.
+3. Create a `Project` on your dashboard. Either use "Empty Project", or "Deploy from Github Repo".
+4. In the new project, it should have auto-created an `Environment` called "production", which you can see at the top. (We can create multiple environments, but for now we only need one). If you did "Deploy from Github Repo" in Step 3, it might have already added a Service, in which case you can skip step 5 and 6.
+5. In the "production" `Environment`, you can `Add a Service`, and choose `Github Repo`. 
+6.  Select your repo; if not visible, choose `Configure Github App`, and make your repo visible, then select it.
+7. You should see the `Service` on the dashboard corresponding to your Github repo. Click on it to see details.
+8. In your `Service`'s details, there is a tab for `Deployments`. Every time you push a change to your repo, there should be a record of a new deployment. You can `Restart`, `Redeploy`, or `Remove` your deployment from this tab.
+9. In your `Service`'s details, there is a tab for `Variables`. This is where environment variables can be set, which you need to make your deployed app able to connect to your database. You can add the variables and values from your `.env` file here, either one at a time or all at once via the `RAW Editor`. Changing the variables should cause a reployment automatically.
+10. In your `Service`'s details, there is a tab for `Settings`. In the Environment section, you can click the `Generate Domain`. It will produce a domain that you can navigate to in your browser to see your web app live! 
+
+As noted above, you only have 500 hours of runtime per month on a Free Tier, so you will want to `Remove` your deployment via the `Deployments` tab when you're not using it. It is easy enough to `Redeploy` when you need to start it up again.
+
+## (6.5.1) OPTIONAL: Adding a production database  
+
+At this point, using the database credentials from your `.env`, the deployed app shares the database that you've been using during development. At this time, you may find that acceptable (you're still developing after all), but you will eventually want to deploy a separate production MySQL database. 
+
+If you want railway.app to create and manage a MySQL database, you can do the following:
+1. In your "production" `Environment`, click the `+ New` button and choose `Database`, then `Add MySQL`. It should spin up a new `Service` that is a `MySQL` database.
+2. The details for the `MySQL` `Service` should have rudimentary options for manually creating tables, or running arbitrary queries. You can run the setup queries that your `db_init.js` uses to get the new database set up the same way as your development database.  
+3. Both the `Connect` and `Variables` tabs include the relevant database connection values, including hostname, port, username, password, and schema. Copy the relevant values and change the `Variables` for your deployed web app to use these values instead of your old `.env`'s values. (You can also use the connection info to set up a connection via MySQL Workbench if you would like to manage it directly using that tool) 
+
+Note that this database will also count towards your 500 hours - even if your web app is down, as long as the database exists, it contributes to your runtime. The `Settings` has a button to `Delete Service` means your database will be completely removed. 
+
+# (6.6) What's next? 
+
+There are still many improvements to make to our app. But a pressing one, now that we have it online, is this: anyone can access our web app and cause changes to our database!
+
+Next up - adding Authentication and Authorization.
