@@ -5,11 +5,23 @@ const helmet = require("helmet");
 const db = require('./db/db_pool');
 const app = express();
 const port = process.env.PORT || 8080;
-app.use(helmet());
+
+//Configure Express to use certain HTTP headers for security
+//Explicitly set the CSP to allow the source of Materialize
+app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", 'cdnjs.cloudflare.com'],
+      }
+    }
+  })); 
+  
 // Configure Express to use EJS
 app.set( "views",  __dirname + "/views");
 app.set( "view engine", "ejs" );
-// // Configure Express to parse incoming JSON data
+
+// Configure Express to parse incoming JSON data
 // app.use( express.json() );
 // Configure Express to parse URL-encoded POST request bodies (traditional forms)
 app.use( express.urlencoded({ extended: false }) );

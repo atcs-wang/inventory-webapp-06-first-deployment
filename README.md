@@ -46,7 +46,7 @@ Anytime you have a common command or series of commands, creating an npm script 
 
 If our app is going to be on the web, it could potentially be the target of a wide variety of attacks. 
 
-A popular `npm` package for dealing with some common security flaws is `helmet`, which sets some default HTTP headers.
+A popular `npm` package for web security is `helmet`, which provides middleware that set a variety of HTTP headers that protect against some common security flaws.
 
 > Read more about helmet at [https://www.npmjs.com/package/helmet](https://www.npmjs.com/package/helmet)
 
@@ -76,8 +76,25 @@ And right after `app` is initialized, add the line below:
 ```js
 const app = express(); 
 ...
-app.use(helmet()); //add this
+//Configure Express to use certain HTTP headers for security
+//Explicitly set the CSP to allow certain sources
+app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", 'cdnjs.cloudflare.com'],
+        styleSrc: ["'self'", 'cdnjs.cloudflare.com', 'fonts.googleapis.com'],
+        fontSrc: ["'self'", 'fonts.googleapis.com']
+      }
+    }
+  })); 
 ```
+
+One of the headers that helmet sets is `Content-Security-Policy`, which generally disallows scripts and stylesheets coming from external sources. This protects against a variety of injection attacks, but since we are utilizing JS and CSS from the Materialize framework (sourced from `cdnjs.cloudflare.com`) and icons from Google Fonts, we are specifying that those sources are acceptable.
+
+> Alternatively, instead of enabling specific external sources, we could have downloaded our fonts and the Materialize framework as local files, putting them in our `public` folder instead.
+
+> NOTE: The `Content-Security-Policy` also disables inline JS scripts and CSS styles. If your webpages utilize inline scripts and styles, you should move them to external `.js` and `.css` files in your `public` folder instead.
 
 # (6.3) `PORT` environment variable
 
