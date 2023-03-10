@@ -82,15 +82,13 @@ app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", 'cdnjs.cloudflare.com'],
-        styleSrc: ["'self'", 'cdnjs.cloudflare.com', 'fonts.googleapis.com'],
-        fontSrc: ["'self'", 'fonts.googleapis.com']
+        scriptSrc: ["'self'", 'cdnjs.cloudflare.com']
       }
     }
   })); 
 ```
 
-One of the headers that helmet sets is `Content-Security-Policy`, which generally disallows scripts and stylesheets coming from external sources. This protects against a variety of injection attacks, but since we are utilizing JS and CSS from the Materialize framework (sourced from `cdnjs.cloudflare.com`) and icons from Google Fonts, we are specifying that those sources are acceptable.
+One of the headers that helmet sets is `Content-Security-Policy`, which generally disallows scripts coming from external sources. This protects against a variety of injection attacks, but since we are utilizing JS from the Materialize framework (sourced from `cdnjs.cloudflare.com`), we are explicitly specifying its source is safe and allowed.
 
 > Alternatively, instead of enabling specific external sources, we could have downloaded our fonts and the Materialize framework as local files, putting them in our `public` folder instead.
 
