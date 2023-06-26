@@ -1,7 +1,8 @@
-# Part 06: First Deployment  
+# Part 06b: First Deployment  
 
 This tutorial follows after:
 [Part 05: Implementing CRUD operations: Using Forms and POST requests](https://github.com/atcs-wang/inventory-webapp-05-handling-forms-post-crud)
+You likely also did [Part 06a: Authentication and Authorization  ](https://github.com/atcs-wang/inventory-webapp-06-auth), but you can technically do this tutorial first and then backtrack to that tutorial.
 
 With all the basic CRUD routes implemented, we have a usable web-app! At this point, it is time to  deploy a first version of your application to a cloud-hosting service.
 
@@ -9,29 +10,19 @@ In this tutorial, we'll do a variety of small changes that prepare our code for 
 
 Finally, we'll use a beginner-friendly cloud hosting service to deploy your application to the web!
 
-# (6.1) `npm` scripts
+# (6.1) `npm` start scripts
 
-The Node environment allows us to define **custom scripts** - short aliases for commonly used commands - in the `package.json` file, and run them via `npm run scriptname`.
-
-Find the `"scripts"` section of `package.json`:
-```json
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-```
-
-and replace it with this:
+Double check that your `"scripts"` section of `package.json` has the `"start"` script defined:
 
 ```json
   "scripts": {
-    "start": "node app.js", 
-    "initdb": "node db/db_init.js"
+    "start": "node app.js",
    },
 ```
 
-Now, you can try running some of these scripts:
+Try these commands to confirm it is working.
+
 ```
-> npm run initdb            //re-initialize the database
 > npm run start             //start the server
 > npm start                 //start the server (alternative)
 ```
@@ -39,8 +30,6 @@ Now, you can try running some of these scripts:
 Note that `npm start` can also be used in place of `npm run start`. All the other scripts require the full "`npm run ____`" but `npm start` is a special command. 
 
 **Most cloud deployment services use `npm start` to start your server, so it's vital important that we defined the `"start"` script.**
-
-Anytime you have a common command or series of commands, creating an npm script can make it more convenient, and documents it. We will add more of these scripts in the future.
 
 # (6.2) Using `helmet` for security
 
@@ -96,23 +85,23 @@ One of the headers that helmet sets is `Content-Security-Policy`, which generall
 
 # (6.3) `PORT` environment variable
 
-We have been using an arbitrary `port` number for our application: 8080 in the sample code, but during development/testing could be any number from 1024 to 65353. 
+We have been using an arbitrary `port` number for our application: 3000 in the sample code, but during development/testing could be any number from 1024 to 65353. 
 
 **However, cloud hosting services need to be able to specify which port to use on their servers** (typically `80` but we shouldn't assume). Most cloud hosting services will set an environment variable named `PORT` that our app should use when deployed. 
 
 Change the `port` variable definition at the top of `app.js` from this:
 
 ```js
-const port = 8080;
+const port = 3000;
 ```
 
 to this:
 
 ```js
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3000;
 ```
 
-If a `PORT` environment variable is set, our `port` variable will use it; otherwise, the port will default to 8080.
+If a `PORT` environment variable is set, our `port` variable will use it; otherwise, the port will default to 3000.
 
 > If you want, try setting the `PORT` environment variable by adding this in the `.env` file:
 > 
@@ -165,13 +154,13 @@ Now you're ready to deploy your app for the first time on a cloud service!
 The landscape of cloud services for web app deployment is changing constantly, and the options can be overwhelming, especially for first-time app developers. 
 
 At the time of this tutorial's publishing, we would recommend using [railway.app](https://railway.app) for your first deployment. It sports:
-1. A credit-card-less free tier
+1. A credit-card-less starter tier
 2. Beginner-friendly online dashboard
 3. Easy integration with Github, with auto-deployment on new commits
 4. Native support for MySQL database instances (and some other database types too)
 5. Relatively succinct documentation
 
-Railway's free-tier has limit of 500 hrs/month operation which would require some judicious "turning" off of your app to last the month. (Unchecked, you'll run out of hours after ~3 weeks of uptime).  If you're willing to add your credit card to your account, you can fairly affordably remove the limit, paying for whatever amount of compute power / runtime that you need. 
+Railway's free-tier has an initial $5 credit, which when used up requires an upgrade to a paid subscription with a credit card.  If you're willing to add your credit card to your account, the cost for a subscription is $5 a month, plus paying for whatever amount of compute power / runtime that you need beyond that. 
 
 We will not provide detailed instructions on using Railway here, but here are the general steps you should take:
 1. Create an account on [railway.app](https://railway.app); the most convenient is to use your Github account as your login.
@@ -182,24 +171,54 @@ We will not provide detailed instructions on using Railway here, but here are th
 6.  Select your repo; if not visible, choose `Configure Github App`, and make your repo visible, then select it.
 7. You should see the `Service` on the dashboard corresponding to your Github repo. Click on it to see details.
 8. In your `Service`'s details, there is a tab for `Deployments`. Every time you push a change to your repo, there should be a record of a new deployment. You can `Restart`, `Redeploy`, or `Remove` your deployment from this tab.
-9. In your `Service`'s details, there is a tab for `Variables`. This is where environment variables can be set, which you need to make your deployed app able to connect to your database. You can add the variables and values from your `.env` file here, either one at a time or all at once via the `RAW Editor`. Changing the variables should cause a reployment automatically.
-10. In your `Service`'s details, there is a tab for `Settings`. In the Environment section, you can click the `Generate Domain`. It will produce a domain that you can navigate to in your browser to see your web app live! 
 
-As noted above, you only have 500 hours of runtime per month on a Free Tier, so you will want to `Remove` your deployment via the `Deployments` tab when you're not using it. It is easy enough to `Redeploy` when you need to start it up again.
+9. In your `Service`'s details, there is a tab for `Settings`. In the Environment section, you can click the `Generate Domain`. It will produce a domain that you can (in a moment) navigate to in your browser to see your web app live.
+10. In your `Service`'s details, there is a tab for `Variables`. This is where environment variables can be set, which you need to make your deployed app able to connect to your database. You can add the variables and values from your `.env` file here, either one at a time or all at once via the `RAW Editor`. Changing the variables should cause a re-deployment automatically.
+
+> If you already integrated Auth0, one variable from your .env needs to be changed for the deployed environment: `AUTH0_BASE_URL`, which should be a URL using the domain of the actual hosted site, not `localhost`. The domain, of course, is what was generated in the previous step.
+
+11. If you navigate to the domain provided in step 9, you should now see your homepage deployed! However, the login will not yet work.
+
+> As noted above, you only have $5 worth of runtime per month on a Free Tier, so you will want to `Remove` your deployment via the `Deployments` tab when you're not using it. It is easy enough to `Redeploy` when you need to start it up again.
+
+## (6.5.1) Auth0 update
+
+If you have already integrated Auth0 logins, you will need to do one last step before your app can actually work - Auth0 needs to be aware of this deployment to allow callbacks to it.
+
+Go to Auth0 and find your application. Update the `Application Settings` on Auth0: In the `Application URIs` section, change the `Allowed Callback URL` box from just `http://localhost:PORT/callback` to :
+
+```
+  http://localhost:PORT/callback,
+  https://<HOSTDOMAIN>/callback
+```
+and the `Allowed Logout URLs` box from just `http://localhost:PORT` to:
+
+```
+  http://localhost:PORT,
+  https://<HOSTDOMAIN>
+``` 
+
+This allows Auth0 to work both for local development, and for the hosted site.
+
+Now, you should be able to log in and access all parts of your app on the hosted site.
 
 ## (6.5.1) OPTIONAL: Adding a production database  
 
-At this point, using the database credentials from your `.env`, the deployed app shares the database that you've been using during development. At this time, you may find that acceptable (you're still developing after all), but you will eventually want to deploy a separate production MySQL database. 
+At this point, using the database credentials from your `.env`, the deployed app shares the database that you've been using during development. At this time, you may find that acceptable (you're still developing after all), but you may eventually want to deploy a separate production MySQL database. 
 
 If you want railway.app to create and manage a MySQL database, you can do the following:
 1. In your "production" `Environment`, click the `+ New` button and choose `Database`, then `Add MySQL`. It should spin up a new `Service` that is a `MySQL` database.
 2. The details for the `MySQL` `Service` should have rudimentary options for manually creating tables, or running arbitrary queries. You can run the setup queries that your `db_init.js` uses to get the new database set up the same way as your development database.  
 3. Both the `Connect` and `Variables` tabs include the relevant database connection values, including hostname, port, username, password, and schema. Copy the relevant values and change the `Variables` for your deployed web app to use these values instead of your old `.env`'s values. (You can also use the connection info to set up a connection via MySQL Workbench if you would like to manage it directly using that tool) 
 
-Note that this database will also count towards your 500 hours - even if your web app is down, as long as the database exists, it contributes to your runtime. The `Settings` has a button to `Delete Service` means your database will be completely removed. 
+Note that this database will also count towards your credits - even if your web app is down, as long as the database exists, it contributes to your runtime. The `Settings` has a button to `Delete Service` means your database will be completely removed. 
 
 # (6.6) What's next? 
 
-There are still many improvements to make to our app. But a pressing one, now that we have it online, is this: anyone can access our web app and cause changes to our database!
 
-Next up - adding Authentication and Authorization.
+If you did this part of the tutorial before integrating Auth0 for authentication and authorization, you should now check out:[Part 06a: Authentication and Authorization  ](https://github.com/atcs-wang/inventory-webapp-06-auth)
+
+There are still many improvements to make to our app! The app currently restricts users to a fixed set of subjects to choose from; it would be great if users could create and manage their own custom subjects. As we do that, however, there are some structural changes and improvements that we ought to make to our project that will pay dividends down the road for future expansion.
+
+Check out [Part 07: More CRUD operations, code reorganization](https://github.com/atcs-wang/inventory-webapp-07-reorganization-expansion). Note that the README tutorial is currently incomplete.
+
